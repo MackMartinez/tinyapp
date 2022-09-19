@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/MackyClap/tinyapp/issues"
   },
-  "homepage": "https://github.com/MackyClap/tinyapp#readme"
+  "homepage": "https://github.com/MackyClap/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
 }
