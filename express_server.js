@@ -14,8 +14,8 @@ const generateRandomString = function () {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomUrl = "";
 
-  for (let x = 0; x < 5; x++) {
-    randomUrl += characters.charAt(Math.floor(Math.random() * charactersLength));
+  for (let x = 0; x < 6; x++) {
+    randomUrl += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return randomUrl;
 }
@@ -47,7 +47,7 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.send(generateRandomString()); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/:id", (req,res) => {
