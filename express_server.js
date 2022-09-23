@@ -10,7 +10,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const generateRandomString = function () {
+const generateRandomString = function() {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomUrl = "";
 
@@ -18,7 +18,7 @@ const generateRandomString = function () {
     randomUrl += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return randomUrl;
-}
+};
 
 app.get("/", (req, res) => {
   res.send('Hello!');
@@ -37,7 +37,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); 
+  console.log(req.body);
   const newUrl = generateRandomString();
   urlDatabase[newUrl] = req.body.longURL;
   res.redirect(`/urls/${newUrl}`);
@@ -60,5 +60,10 @@ app.get("/urls/:id", (req,res) => {
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  if (!longURL) {
+  // if (!keys.includes(req.params.id)) {
+    res.send("URL does not exist");
+    return;
+  }
   res.redirect(longURL);
 });
