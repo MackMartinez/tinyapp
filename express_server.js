@@ -62,7 +62,7 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (!longURL) {
   // if (!keys.includes(req.params.id)) {
-    res.send("URL does not exist");
+    res.send("Please enter a valid URL beginning with http://");
     return;
   }
   res.redirect(longURL);
