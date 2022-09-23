@@ -37,7 +37,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   const newUrl = generateRandomString();
   urlDatabase[newUrl] = req.body.longURL;
   res.redirect(`/urls/${newUrl}`);
@@ -55,7 +54,18 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
-})
+});
+
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect(`/urls`);
+});
+
+app.post("/urls/:id/edit", (req, res) => {
+  const id = req.params.id;
+  const templateVars = { id, longURL: urlDatabase };
+  res.render("urls_show", templateVars);
+});
 
 app.get("/urls/:id", (req,res) => {
   const id = req.params.id;
