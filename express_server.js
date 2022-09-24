@@ -8,9 +8,18 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieParser());
 
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  // user0: {
+  // id: 123,
+  // email:123,
+  // password:123,
+  // }
 };
 
 //Randomize tiny URL
@@ -24,17 +33,6 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
-//Cookies
-
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect("/urls");
-});
 
 //Routes
 app.get("/", (req, res) => {
@@ -47,12 +45,18 @@ app.listen(port, () => {
 
 app.get("/urls.json", (req,res) => {
   res.json(urlDatabase);
-});
 
-app.post("/urls", (req, res) => {
-  const newUrl = generateRandomString();
-  urlDatabase[newUrl] = req.body.longURL;
-  res.redirect(`/urls/${newUrl}`);
+  //Cookies
+  
+  app.post("/login", (req, res) => {
+    res.cookie("username", req.body.username);
+    res.redirect("/urls");
+  });
+  
+  app.post("/logout", (req, res) => {
+    res.clearCookie("username");
+    res.redirect("/urls");
+  });
 });
 
 app.get("/urls", (req,res) => {
@@ -73,6 +77,27 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/register", (req, res) => {
   res.render("register");
+});
+
+
+
+app.post("/urls", (req, res) => {
+  const newUrl = generateRandomString();
+  urlDatabase[newUrl] = req.body.longURL;
+  res.redirect(`/urls/${newUrl}`);
+});
+
+app.post("/register", (req,res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomString();
+  const userNum = Object.keys(users).length;
+  users[`user${userNum}${id}`] = {
+    id,
+    email,
+    password
+  };
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
