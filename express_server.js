@@ -36,91 +36,103 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req,res) => {
   res.json(urlDatabase);
 });
-  //Cookies
+
+//Cookies
   
   app.post("/login", (req, res) => {
-    res.cookie("username", req.body.username);
-    res.redirect("/urls");
+    res.redirect("/register");
   });
 
   app.post("/logout", (req, res) => {
-    res.clearCookie("username");
-    res.redirect("/urls");
+
+    res.redirect("/register");
   });
+
+//Create & Read/Get & Post
 
 app.get("/urls", (req,res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
 
+//Ready new
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
 
+//Read readister
 app.get("/register", (req, res) => {
   res.render("register");
 });
 
+// Create new url
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
   urlDatabase[newUrl] = req.body.longURL;
   res.redirect(`/urls/${newUrl}`);
 });
 
+
+// register email and password
+
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
   // const password = req.body.password;
   const id = generateRandomString();
-  const userNum = Object.keys(users).length;
   //if no email and password, return error, status 400 error
-  users[`user${userNum}${id}`] = {
+  users[id] = {
     id,
     email,
     password
   };
 
   console.log(users);
-  res.cookie("userid", id);
+  res.cookie("user_id", id);
   res.redirect("/urls");
 });
 
+//Delete single
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
 });
 
+//Create 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`/urls`);
 });
 
+//Edit
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const templateVars = {
     id,
     longURL: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
 
+//Read single
 app.get("/urls/:id", (req,res) => {
   const id = req.params.id;
   const templateVars = {
     id,
     longURL: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
 
+//Read single
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (!longURL) {
