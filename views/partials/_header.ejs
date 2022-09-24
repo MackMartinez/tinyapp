@@ -9,10 +9,7 @@
       aria-controls="navbarNavAltMarkup"
       aria-expanded="false"
       aria-label="Toggle navigation"
-    ><form method="post" action="/login">
-      <input type="text">
-      <button type="submit">Sign In</button>
-    </form>
+      >
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -21,5 +18,9 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
+    <form method="POST" action="/login">
+      <input type="text" name="username">
+      <button type="submit">Sign In</button>
+    </form>
   </nav>
 </header>
