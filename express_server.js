@@ -15,11 +15,6 @@ const urlDatabase = {
 };
 
 const users = {
-  // user0: {
-  // id: 123,
-  // email:123,
-  // password:123,
-  // }
 };
 
 //Randomize tiny URL
@@ -33,31 +28,25 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
-
 //Routes
 app.get("/", (req, res) => {
   res.send('Hello!');
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`);
-});
-
 app.get("/urls.json", (req,res) => {
   res.json(urlDatabase);
-
+});
   //Cookies
   
   app.post("/login", (req, res) => {
     res.cookie("username", req.body.username);
     res.redirect("/urls");
   });
-  
+
   app.post("/logout", (req, res) => {
     res.clearCookie("username");
     res.redirect("/urls");
   });
-});
 
 app.get("/urls", (req,res) => {
   const templateVars = {
@@ -79,8 +68,6 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-
-
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
   urlDatabase[newUrl] = req.body.longURL;
@@ -88,15 +75,19 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/register", (req,res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
+  // const password = req.body.password;
   const id = generateRandomString();
   const userNum = Object.keys(users).length;
+  //if no email and password, return error, status 400 error
   users[`user${userNum}${id}`] = {
     id,
     email,
     password
   };
+
+  console.log(users);
+  res.cookie("userid", id);
   res.redirect("/urls");
 });
 
@@ -138,3 +129,20 @@ app.get("/u/:id", (req, res) => {
   }
   res.redirect(longURL);
 });
+
+//if route doesn't exist
+// app.use((req,res) => {
+//   res.status(404).send("URL not found");
+
+
+//   //200 for found 
+// });
+
+//listener
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}!`);
+});
+
+// lecture notes
+// !email || !password
+// return error
