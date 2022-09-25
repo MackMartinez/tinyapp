@@ -1,4 +1,4 @@
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const app = express();
@@ -7,10 +7,15 @@ const port = 8080;
 
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['mackDev1','2089md'], 
 
+  // Cookie Options
+  maxAge: 10 * 60 * 1000 // 10 min
+}))
 
-
+//Databases
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -62,6 +67,7 @@ const urlsForUser = (id) =>{
 
 //Routes
 app.get("/", (req, res) => {
+  req.session.views = (req.session.views || 0) + 1;
   res.send('Hello!');
 });
 
@@ -81,22 +87,24 @@ app.post("/login", (req, res) => {
       
   } else {
     
-    res.cookie("user_id", matchID.id);
+    // res.cookie("user_id", matchID.id);
+    req.session.user_id = matchID.id;
     res.redirect("/urls");
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
+  req.session.user_id = null;
   res.redirect("/login");
 });
 
 //Create & Read/Get & Post
 
 app.get("/urls", (req,res) => {
-  const userLoggedIn = users[req.cookies["user_id"]];
+  const userLoggedIn = users[req.session.user_id];
   const templateVars = {
-    urls: urlsForUser(req.cookies["user_id"]),
+    urls: urlsForUser(req.session.user_id),
     user: userLoggedIn
   };
 
@@ -111,10 +119,10 @@ app.get("/urls", (req,res) => {
 app.get("/login", (req,res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
 
-  if (users[req.cookies["user_id"]]) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   }
   res.render("login",templateVars);
@@ -124,9 +132,9 @@ app.get("/login", (req,res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
-  if (!users[req.cookies["user_id"]]) {
+  if (!users[req.session.user_id]) {
     res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -136,10 +144,10 @@ app.get("/urls/new", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
 
-  if (users[req.cookies["user_id"]]) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   }
   res.render("register",templateVars);
@@ -149,12 +157,12 @@ app.get("/register", (req, res) => {
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
   const { longURL } = req.body;
-  if (!users[req.cookies["user_id"]]) {
+  if (!users[req.session.user_id]) {
     return res.send("Please register in order to use TinyApp!");
   }
   urlDatabase[newUrl] = {
     longURL,
-    userID: req.cookies["user_id"],
+    userID: req.session.user_id,
   };
   res.redirect(`/urls/${newUrl}`);
 });
@@ -179,27 +187,24 @@ app.post("/register", (req,res) => {
     email,
     password: hashedPassword
   };
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   res.redirect("/urls");
 });
 
 //Delete single
 app.post("/urls/:id/delete", (req, res) => {
-  for (const val in urlDatabase) {
-    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
-      return res.send("User does not own URL");
-    }
-  }
-  delete urlDatabase[req.params.id];
+  const id = req.params.id;
+  if (req.session.user_id !== urlDatabase[id].userID) {
+    return res.send("User does not own URL");
+  };
+  delete urlDatabase[id];
   res.redirect(`/urls`);
 });
 
-//Create
+//Createa
 app.post("/urls/:id", (req, res) => {
   const { longURL } = req.body;
-  urlDatabase[req.params.id] = {
-    longURL
-  };
+  urlDatabase[req.params.id].longURL = longURL;
   res.redirect(`/urls`);
 });
 
@@ -207,16 +212,16 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
 
-  for (const val in urlDatabase) {
-    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
+
+    if (req.session.user_id !== urlDatabase[id].userID) {
       return res.send("User does not own URL");
-    }
-  };
+    };
+  
 
   const templateVars = {
     id,
     longURL: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -224,22 +229,23 @@ app.post("/urls/:id/edit", (req, res) => {
 //Read single
 app.get("/urls/:id", (req,res) => {
   const id = req.params.id;
-  const userLoggedIn = users[req.cookies["user_id"]];
+  const userLoggedIn = users[req.session.user_id];
   const templateVars = {
     id,
     longURL: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   };
   
   if (!userLoggedIn) {
     res.send("Please login");
   }
 
-  for (const val in urlDatabase) {
-    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
+  
+    if (req.session.user_id !== urlDatabase[id].userID) {
+      console.log(req.session.user_id,urlDatabase[id]);
       return res.send("User does not own URL");
     }
-  }
+  
   res.render("urls_show", templateVars);
 });
 
