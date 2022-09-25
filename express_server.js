@@ -8,7 +8,7 @@ const port = 8080;
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieParser());
-var hashedPassword = bcrypt.hashSync('password', 8);
+
 
 
 const urlDatabase = {
@@ -70,11 +70,13 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   const { email,password } = req.body;
   const matchID = userExists(email);
+  const passwordsMatch = bcrypt.compareSync(password, matchID.password);
 
   if (!userExists(email)) {
     //return if email does not exist
     res.status(403).send("403 status - Invalid Credentials");
-  } else if (userExists(email) && matchID.password !== password) {
+
+  } else if (!passwordsMatch) {
     return res.status(403).send("403 status - Invalid Credentials");
       
   } else {
@@ -162,7 +164,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-
+  var hashedPassword = bcrypt.hashSync(password, 8);
   if (!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
   }
