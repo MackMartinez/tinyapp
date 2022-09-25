@@ -17,7 +17,7 @@ const urlDatabase = {
   "9sm5xK":{
     longURL: "http://www.google.com",
     userID: "firstUser"
-  } 
+  }
 };
 
 const users = {
@@ -34,15 +34,15 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
-  //find existing email
-  const userExists = (email)  => {
-    for (const usr in users) {
-      if(users[usr].email === email){
-        return users[usr];
-      }
+//find existing email
+const userExists = (email)  => {
+  for (const usr in users) {
+    if (users[usr].email === email) {
+      return users[usr];
     }
-    return false
-  };
+  }
+  return false;
+};
 
 //Routes
 app.get("/", (req, res) => {
@@ -51,26 +51,27 @@ app.get("/", (req, res) => {
 
 //Cookies
   
-  app.post("/login", (req, res) => {
-    const { email,password } = req.body;
-    const matchID = userExists(email);
+app.post("/login", (req, res) => {
+  const { email,password } = req.body;
+  const matchID = userExists(email);
 
-    if(!userExists(email)) {
-      //return if email does not exist
-      res.status(403).send("403 status - Invalid Credentials")
-    } else if ( userExists(email) && matchID.password !== password){
-        return res.status(403).send("403 status - Invalid Credentials")
+  if (!userExists(email)) {
+    //return if email does not exist
+    res.status(403).send("403 status - Invalid Credentials");
+  } else if (userExists(email) && matchID.password !== password) {
+    return res.status(403).send("403 status - Invalid Credentials");
       
-    } else {
+  } else {
     
     res.cookie("user_id", matchID.id);
     res.redirect("/urls");
-  }});
+  }
+});
 
-  app.post("/logout", (req, res) => {
-    res.clearCookie("user_id");
-    res.redirect("/login");
-  });
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/login");
+});
 
 //Create & Read/Get & Post
 
@@ -89,10 +90,10 @@ app.get("/login", (req,res) => {
     user: users[req.cookies["user_id"]]
   };
 
-  if(users[req.cookies["user_id"]]) {
-    res.redirect("/urls")
+  if (users[req.cookies["user_id"]]) {
+    res.redirect("/urls");
   }
-  res.render("login",templateVars)
+  res.render("login",templateVars);
 });
 
 //Read new
@@ -101,8 +102,8 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
-  if(!users[req.cookies["user_id"]]) {
-    res.redirect("/login")
+  if (!users[req.cookies["user_id"]]) {
+    res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
@@ -114,8 +115,8 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]]
   };
 
-  if(users[req.cookies["user_id"]]) {
-    res.redirect("/urls")
+  if (users[req.cookies["user_id"]]) {
+    res.redirect("/urls");
   }
   res.render("register",templateVars);
 });
@@ -124,10 +125,10 @@ app.get("/register", (req, res) => {
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
   const { longURL } = req.body;
-  if(!users[req.cookies["user_id"]]) {
+  if (!users[req.cookies["user_id"]]) {
     return res.send("Please register in order to use TinyApp!");
   }
-  urlDatabase[newUrl]= {
+  urlDatabase[newUrl] = {
     longURL
   };
   res.redirect(`/urls/${newUrl}`);
@@ -141,9 +142,9 @@ app.post("/register", (req,res) => {
 
 
 
-  if(!email || !password) {
+  if (!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
-  } 
+  }
   
   if (userExists(email)) {
     return res.status(400).send("400 bad request - User already exists");
@@ -167,7 +168,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//Create 
+//Create
 app.post("/urls/:id", (req, res) => {
   const { longURL } = req.body;
   urlDatabase[req.params.id] = {
@@ -202,32 +203,26 @@ app.get("/urls/:id", (req,res) => {
 
 //Read single
 app.get("/u/:id", (req, res) => {
-  const idCheckP = req.params.id;
-  const longURL = urlDatabase[idCheckP].longURL;
-  const idCheck = () => {
-    for(const id in urlDatabase) {
-      if(idCheckP !== id){
-      }
-      return res.send("ID does not exist!")
-    }
-    return false;
-  }; 
-  idCheck();
+  const idParam = req.params.id;
+  const longURL = urlDatabase[idParam];
 
   if (!longURL) {
-    res.send("Please enter a valid URL beginning with http://");
-    return;
+    res.status(404).send("404 - Invalid or missing URL");
   }
 
-  res.redirect(longURL);
-});
+  if (!longURL.longURL) {
+    return res.status(404).send("Please enter a valid URL beginning with http://");
+  }
+  res.redirect(longURL.longURL);
+}
+);
 
 //if route doesn't exist
 app.use((req,res) => {
   res.status(404).send("URL not found");
 
 
-  //200 for found 
+  //200 for found
 });
 
 //listener
