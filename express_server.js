@@ -10,8 +10,14 @@ app.use(cookieParser());
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "firstUser"
+  },
+  "9sm5xK":{
+    longURL: "http://www.google.com",
+    userID: "firstUser"
+  } 
 };
 
 const users = {
@@ -117,11 +123,13 @@ app.get("/register", (req, res) => {
 // Create new url
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
+  const { longURL } = req.body;
   if(!users[req.cookies["user_id"]]) {
     return res.send("Please register in order to use TinyApp!");
   }
-  urlDatabase[newUrl] = req.body.longURL;
-
+  urlDatabase[newUrl]= {
+    longURL
+  };
   res.redirect(`/urls/${newUrl}`);
 });
 
@@ -161,7 +169,10 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //Create 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  const { longURL } = req.body;
+  urlDatabase[req.params.id] = {
+    longURL
+  };
   res.redirect(`/urls`);
 });
 
@@ -191,15 +202,18 @@ app.get("/urls/:id", (req,res) => {
 
 //Read single
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const idCheckP = req.params.id;
+  const longURL = urlDatabase[idCheckP].longURL;
   const idCheck = () => {
     for(const id in urlDatabase) {
-      if(req.params.id !== id)
+      if(idCheckP !== id){
+      }
       return res.send("ID does not exist!")
     }
+    return false;
   }; 
   idCheck();
-  
+
   if (!longURL) {
     res.send("Please enter a valid URL beginning with http://");
     return;
