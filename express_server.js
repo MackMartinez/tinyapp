@@ -82,6 +82,10 @@ app.get("/login", (req,res) => {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
+
+  if(users[req.cookies["user_id"]]) {
+    res.redirect("/urls")
+  }
   res.render("login",templateVars)
 });
 
@@ -91,6 +95,9 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
+  if(!users[req.cookies["user_id"]]) {
+    res.redirect("/login")
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -100,13 +107,21 @@ app.get("/register", (req, res) => {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
+
+  if(users[req.cookies["user_id"]]) {
+    res.redirect("/urls")
+  }
   res.render("register",templateVars);
 });
 
 // Create new url
 app.post("/urls", (req, res) => {
   const newUrl = generateRandomString();
+  if(!users[req.cookies["user_id"]]) {
+    return res.send("Please register in order to use TinyApp!");
+  }
   urlDatabase[newUrl] = req.body.longURL;
+
   res.redirect(`/urls/${newUrl}`);
 });
 
@@ -169,16 +184,27 @@ app.get("/urls/:id", (req,res) => {
     longURL: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
+  
+
   res.render("urls_show", templateVars);
 });
 
 //Read single
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  const idCheck = () => {
+    for(const id in urlDatabase) {
+      if(req.params.id !== id)
+      return res.send("ID does not exist!")
+    }
+  }; 
+  idCheck();
+  
   if (!longURL) {
     res.send("Please enter a valid URL beginning with http://");
     return;
   }
+
   res.redirect(longURL);
 });
 
