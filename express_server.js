@@ -27,8 +27,7 @@ const urlDatabase = {
   }
 };
 
-const users = {
-};
+const users = {};
 
 //Randomize tiny URL
 const generateRandomString = function() {
@@ -42,10 +41,10 @@ const generateRandomString = function() {
 };
 
 //find existing email
-const userExists = (email)  => {
-  for (const usr in users) {
-    if (users[usr].email === email) {
-      return users[usr];
+const userExists = (email,database)  => {
+  for (const usr in database) {
+    if (database[usr].email === email) {
+      return database[usr];
     }
   }
   return false;
@@ -75,10 +74,10 @@ app.get("/", (req, res) => {
   
 app.post("/login", (req, res) => {
   const { email,password } = req.body;
-  const matchID = userExists(email);
+  const matchID = userExists(email,users);
   const passwordsMatch = bcrypt.compareSync(password, matchID.password);
 
-  if (!userExists(email)) {
+  if (!userExists(email,users)) {
     //return if email does not exist
     res.status(403).send("403 status - Invalid Credentials");
 
@@ -177,7 +176,7 @@ app.post("/register", (req,res) => {
     return res.status(400).send("Please provide e-mail or password");
   }
   
-  if (userExists(email)) {
+  if (userExists(email,users)) {
     return res.status(400).send("400 bad request - User already exists");
   }
 
