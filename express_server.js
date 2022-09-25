@@ -28,6 +28,17 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
+
+const findEmail = function(objInput,value) {
+  const keyArr = Object.keys(objInput);
+  for (let x = 0; x < keyArr.length; x++) {
+    if (objInput[keyArr[x]] === value) {
+      // console.log(keyArr[x]);
+      return keyArr[x];
+    }
+  }
+};
+
 //Routes
 app.get("/", (req, res) => {
   res.send('Hello!');
@@ -84,9 +95,26 @@ app.post("/urls", (req, res) => {
 
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-  // const password = req.body.password;
+
+//find existing email
+  const userExists = ()  => {
+    for (const usr in users) {
+      if(users[usr].email === email){
+        return true;
+      }
+    }
+    return false
+};
+
+  if(!email || !password) {
+    return res.status(400).send("Please provide e-mail or password");
+  } 
+  
+  if (userExists()) {
+    return res.status(400).send("400 bad request - email already exists");
+  }
+
   const id = generateRandomString();
-  //if no email and password, return error, status 400 error
   users[id] = {
     id,
     email,
@@ -143,18 +171,14 @@ app.get("/u/:id", (req, res) => {
 });
 
 //if route doesn't exist
-// app.use((req,res) => {
-//   res.status(404).send("URL not found");
+app.use((req,res) => {
+  res.status(404).send("URL not found");
 
 
-//   //200 for found 
-// });
+  //200 for found 
+});
 
 //listener
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
 });
-
-// lecture notes
-// !email || !password
-// return error
