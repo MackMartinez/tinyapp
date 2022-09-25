@@ -28,6 +28,16 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
+  //find existing email
+  const userExists = (email)  => {
+    for (const usr in users) {
+      if(users[usr].email === email){
+        return users[usr];
+      }
+    }
+    return false
+  };
+
 //Routes
 app.get("/", (req, res) => {
   res.send('Hello!');
@@ -36,8 +46,20 @@ app.get("/", (req, res) => {
 //Cookies
   
   app.post("/login", (req, res) => {
+    const { email,password } = req.body;
+    const matchID = userExists(email);
+
+    if(!userExists(email)) {
+      //return if email does not exist
+      res.status(403).send("403 status - Invalid Credentials")
+    } else if ( userExists(email) && matchID.password !== password){
+        return res.status(403).send("403 status - Invalid Credentials")
+      
+    } else {
+    
+    res.cookie("user_id", matchID.id);
     res.redirect("/urls");
-  });
+  }});
 
   app.post("/logout", (req, res) => {
 
@@ -86,22 +108,14 @@ app.post("/urls", (req, res) => {
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
 
-  //find existing email
-const userExists = ()  => {
-  for (const usr in users) {
-    if(users[usr].email === email){
-      return true;
-    }
-  }
-  return false
-};
+
 
   if(!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
   } 
   
-  if (userExists()) {
-    return res.status(400).send("400 bad request - email already exists");
+  if (userExists(email)) {
+    return res.status(400).send("400 bad request - User already exists");
   }
 
   const id = generateRandomString();
