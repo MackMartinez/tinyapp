@@ -47,13 +47,13 @@ const userExists = (email)  => {
 //urlsForUsEr(id)
 
 const urlsForUser = (id) =>{
-  const uniqueUserDatabase = {}; 
-    for(const val in urlDatabase){
-      if(id === urlDatabase[val].userID){
-        uniqueUserDatabase[val] = {
-          longURL: urlDatabase[val].longURL,
+  const uniqueUserDatabase = {};
+  for (const val in urlDatabase) {
+    if (id === urlDatabase[val].userID) {
+      uniqueUserDatabase[val] = {
+        longURL: urlDatabase[val].longURL,
       };
-    };
+    }
   }
   return uniqueUserDatabase;
 };
@@ -96,9 +96,9 @@ app.get("/urls", (req,res) => {
     user: userLoggedIn
   };
 
-  if(!userLoggedIn) {
-   return res.send("Please login")
-  };
+  if (!userLoggedIn) {
+    return res.send("Please login");
+  }
 
   res.render("urls_index", templateVars);
 });
@@ -209,13 +209,22 @@ app.post("/urls/:id/edit", (req, res) => {
 //Read single
 app.get("/urls/:id", (req,res) => {
   const id = req.params.id;
+  const userLoggedIn = users[req.cookies["user_id"]];
   const templateVars = {
     id,
     longURL: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
   
+  if (!userLoggedIn) {
+    res.send("Please login");
+  }
 
+  for (const val in urlDatabase) {
+    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
+      return res.send("User does not own URL");
+    }
+  }
   res.render("urls_show", templateVars);
 });
 
