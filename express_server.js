@@ -33,10 +33,6 @@ app.get("/", (req, res) => {
   res.send('Hello!');
 });
 
-app.get("/urls.json", (req,res) => {
-  res.json(urlDatabase);
-});
-
 //Cookies
   
   app.post("/login", (req, res) => {
@@ -58,7 +54,12 @@ app.get("/urls", (req,res) => {
   res.render("urls_index", templateVars);
 });
 
-//Ready new
+//ready login
+app.get("/login", (req,res) => {
+  res.render("login")
+});
+
+//Read new
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
