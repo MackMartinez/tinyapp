@@ -182,6 +182,11 @@ app.post("/register", (req,res) => {
 
 //Delete single
 app.post("/urls/:id/delete", (req, res) => {
+  for (const val in urlDatabase) {
+    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
+      return res.send("User does not own URL");
+    }
+  }
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
 });
@@ -198,6 +203,13 @@ app.post("/urls/:id", (req, res) => {
 //Edit
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
+  
+  for (const val in urlDatabase) {
+    if (req.cookies["user_id"] !== urlDatabase[val].userID) {
+      return res.send("User does not own URL");
+    }
+  };
+
   const templateVars = {
     id,
     longURL: urlDatabase,
