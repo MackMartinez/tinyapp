@@ -36,12 +36,12 @@ app.get("/", (req, res) => {
 //Cookies
   
   app.post("/login", (req, res) => {
-    res.redirect("/register");
+    res.redirect("/urls");
   });
 
   app.post("/logout", (req, res) => {
 
-    res.redirect("/register");
+    res.redirect("/login");
   });
 
 //Create & Read/Get & Post
@@ -68,7 +68,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//Read readister
+//Read register
 app.get("/register", (req, res) => {
   res.render("register");
 });

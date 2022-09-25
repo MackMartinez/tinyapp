@@ -16,6 +16,8 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
       </div>
     </div>
     <% if (user) { %>
@@ -23,13 +25,6 @@
     <form method="POST" action="/logout">
         <button class="btn btn-primary" type="submit">Logout</button>
         </form>
-      <% } else { %>
-    <form method="GET" action="/login">
-      <button class="btn btn-primary" type="submit">Login</button>
-    </form>
-    <form method="GET" action="/register">
-      <button class="btn btn-primary" type="submit">Register</button>
-    </form>
     <% } %>
   </nav>
 </header>
