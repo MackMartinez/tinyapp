@@ -28,17 +28,6 @@ const generateRandomString = function() {
   return randomUrl;
 };
 
-
-const findEmail = function(objInput,value) {
-  const keyArr = Object.keys(objInput);
-  for (let x = 0; x < keyArr.length; x++) {
-    if (objInput[keyArr[x]] === value) {
-      // console.log(keyArr[x]);
-      return keyArr[x];
-    }
-  }
-};
-
 //Routes
 app.get("/", (req, res) => {
   res.send('Hello!');
@@ -96,14 +85,14 @@ app.post("/urls", (req, res) => {
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
 
-//find existing email
-  const userExists = ()  => {
-    for (const usr in users) {
-      if(users[usr].email === email){
-        return true;
-      }
+  //find existing email
+const userExists = ()  => {
+  for (const usr in users) {
+    if(users[usr].email === email){
+      return true;
     }
-    return false
+  }
+  return false
 };
 
   if(!email || !password) {
