@@ -44,6 +44,20 @@ const userExists = (email)  => {
   return false;
 };
 
+//urlsForUsEr(id)
+
+const urlsForUser = (id) =>{
+  const uniqueUserDatabase = {}; 
+    for(const val in urlDatabase){
+      if(id === urlDatabase[val].userID){
+        uniqueUserDatabase[val] = {
+          longURL: urlDatabase[val].longURL,
+      };
+    };
+  }
+  return uniqueUserDatabase;
+};
+
 //Routes
 app.get("/", (req, res) => {
   res.send('Hello!');
@@ -76,10 +90,16 @@ app.post("/logout", (req, res) => {
 //Create & Read/Get & Post
 
 app.get("/urls", (req,res) => {
+  const userLoggedIn = users[req.cookies["user_id"]];
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    urls: urlsForUser(req.cookies["user_id"]),
+    user: userLoggedIn
   };
+
+  if(!userLoggedIn) {
+   return res.send("Please login")
+  };
+
   res.render("urls_index", templateVars);
 });
 
@@ -129,7 +149,8 @@ app.post("/urls", (req, res) => {
     return res.send("Please register in order to use TinyApp!");
   }
   urlDatabase[newUrl] = {
-    longURL
+    longURL,
+    userID: req.cookies["user_id"],
   };
   res.redirect(`/urls/${newUrl}`);
 });
@@ -139,8 +160,6 @@ app.post("/urls", (req, res) => {
 
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-
-
 
   if (!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
@@ -157,7 +176,6 @@ app.post("/register", (req,res) => {
     password
   };
 
-  console.log(users);
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
