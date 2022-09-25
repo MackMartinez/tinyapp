@@ -62,7 +62,7 @@ app.get("/", (req, res) => {
   }});
 
   app.post("/logout", (req, res) => {
-
+    res.clearCookie("user_id");
     res.redirect("/login");
   });
 
@@ -78,7 +78,11 @@ app.get("/urls", (req,res) => {
 
 //ready login
 app.get("/login", (req,res) => {
-  res.render("login")
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("login",templateVars)
 });
 
 //Read new
@@ -92,7 +96,11 @@ app.get("/urls/new", (req, res) => {
 
 //Read register
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("register",templateVars);
 });
 
 // Create new url

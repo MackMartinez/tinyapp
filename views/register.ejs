@@ -17,22 +17,28 @@
     <title>TinyApp</title>
   </head>
   <body>
-    
+    <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <h3>TinyApp Registration</h3>
+      <h3>Create Account</h3>
       <form
        method="POST"
        action="/register">
-       <label>Email</label>
+       <label>Email address</label>
+       <br>
        <input 
          type="email"
          name="email"
-         placeholder="Ex: @gmail.com">
+         placeholder="Enter email">
+         <br>
+         <br>
         <label>Password</label>
+        <br>
        <input 
          type="password"
          name="password"
          placeholder="Password">
+         <br>
+         <br>
         <button type="submit" class="btn btn-primary">
           Submit
         </button>
