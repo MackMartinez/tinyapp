@@ -1,5 +1,6 @@
 const cookieParser = require('cookie-parser');
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const app = express();
 
 const port = 8080;
@@ -7,6 +8,7 @@ const port = 8080;
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieParser());
+var hashedPassword = bcrypt.hashSync('password', 8);
 
 
 const urlDatabase = {
@@ -173,9 +175,8 @@ app.post("/register", (req,res) => {
   users[id] = {
     id,
     email,
-    password
+    password: hashedPassword
   };
-
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
@@ -203,7 +204,7 @@ app.post("/urls/:id", (req, res) => {
 //Edit
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
-  
+
   for (const val in urlDatabase) {
     if (req.cookies["user_id"] !== urlDatabase[val].userID) {
       return res.send("User does not own URL");
