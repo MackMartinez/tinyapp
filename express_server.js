@@ -19,7 +19,7 @@ app.use(cookieSession({
 //Routes
 app.get("/", (req, res) => {
   req.session.views = (req.session.views || 0) + 1;
-  res.send('Hello!');
+  res.redirect("/login");
 });
 
 //Cookies
