@@ -9,11 +9,11 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
-  keys: ['mackDev1','2089md'], 
+  keys: ['mackDev1','2089md'],
 
   // Cookie Options
   maxAge: 10 * 60 * 1000 // 10 min
-}))
+}));
 
 //Databases
 const urlDatabase = {
@@ -40,15 +40,14 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   const { email,password } = req.body;
   const userID = getUserByEmail(email,users);
-  console.log(userID);
   const matchID = users[userID];
-
   const passwordsMatch = bcrypt.compareSync(password, matchID.password);
 
+  
   //return if email does not exist
   if (!getUserByEmail(email,users)) {
     res.status(403).send("403 status - Invalid Credentials");
-
+    
   } else if (!passwordsMatch) {
     return res.status(403).send("403 status - Invalid Credentials");
       
@@ -60,7 +59,6 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  // res.clearCookie("user_id");
   req.session.user_id = null;
   res.redirect("/login");
 });
@@ -138,7 +136,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-  var hashedPassword = bcrypt.hashSync(password, 8);
+  let hashedPassword = bcrypt.hashSync(password, 8);
   if (!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
   }
@@ -152,7 +150,6 @@ app.post("/register", (req,res) => {
     email,
     password: hashedPassword
   };
-  console.log(users);
   req.session.user_id = id;
   res.redirect("/urls");
 });
@@ -162,7 +159,7 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   if (req.session.user_id !== urlDatabase[id].userID) {
     return res.status(404).send("404 - Not Found");
-  };
+  }
   delete urlDatabase[id];
   res.redirect(`/urls`);
 });
@@ -179,9 +176,9 @@ app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
 
 
-    if (req.session.user_id !== urlDatabase[id].userID) {
-      return res.status(404).send("404 - Not Found");
-    };
+  if (req.session.user_id !== urlDatabase[id].userID) {
+    return res.status(404).send("404 - Not Found");
+  }
   
 
   const templateVars = {
@@ -207,9 +204,9 @@ app.get("/urls/:id", (req,res) => {
   }
 
   
-    if (req.session.user_id !== urlDatabase[id].userID) {
-      return res.send("User does not own URL");
-    }
+  if (req.session.user_id !== urlDatabase[id].userID) {
+    return res.send("User does not own URL");
+  }
   
   res.render("urls_show", templateVars);
 });
