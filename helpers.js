@@ -9,7 +9,7 @@ const getUserByEmail = (email,database)  => {
 };
 
 //Randomize tiny URL
-const generateRandomString = function() {
+const generateRandomString = () => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomUrl = "";
 
@@ -39,4 +39,3 @@ module.exports = {
   generateRandomString,
   urlsForUser
 };
-// module.exports = generateRandomString;
