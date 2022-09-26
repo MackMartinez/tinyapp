@@ -161,7 +161,7 @@ app.post("/register", (req,res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   if (req.session.user_id !== urlDatabase[id].userID) {
-    return res.send("User does not own URL");
+    return res.status(404).send("404 - Not Found");
   };
   delete urlDatabase[id];
   res.redirect(`/urls`);
@@ -180,7 +180,7 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
     if (req.session.user_id !== urlDatabase[id].userID) {
-      return res.send("User does not own URL");
+      return res.status(404).send("404 - Not Found");
     };
   
 
