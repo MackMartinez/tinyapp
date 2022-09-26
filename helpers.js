@@ -5,7 +5,7 @@ const getUserByEmail = (email,database)  => {
       return database[usr].id;
     }
   }
-  return ;
+  return;
 };
 
 //Randomize tiny URL
