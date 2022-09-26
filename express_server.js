@@ -2,7 +2,7 @@ const cookieSession = require('cookie-session');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const app = express();
-
+const { getUserByEmail,generateRandomString, urlsForUser } = require('./helpers');
 const port = 8080;
 
 app.use(express.urlencoded({ extended: true }));
@@ -29,41 +29,6 @@ const urlDatabase = {
 
 const users = {};
 
-//Randomize tiny URL
-const generateRandomString = function() {
-  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let randomUrl = "";
-
-  for (let x = 0; x < 6; x++) {
-    randomUrl += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return randomUrl;
-};
-
-//find existing email
-const userExists = (email,database)  => {
-  for (const usr in database) {
-    if (database[usr].email === email) {
-      return database[usr];
-    }
-  }
-  return false;
-};
-
-//urlsForUsEr(id)
-
-const urlsForUser = (id) =>{
-  const uniqueUserDatabase = {};
-  for (const val in urlDatabase) {
-    if (id === urlDatabase[val].userID) {
-      uniqueUserDatabase[val] = {
-        longURL: urlDatabase[val].longURL,
-      };
-    }
-  }
-  return uniqueUserDatabase;
-};
-
 //Routes
 app.get("/", (req, res) => {
   req.session.views = (req.session.views || 0) + 1;
@@ -74,11 +39,14 @@ app.get("/", (req, res) => {
   
 app.post("/login", (req, res) => {
   const { email,password } = req.body;
-  const matchID = userExists(email,users);
+  const userID = getUserByEmail(email,users);
+  console.log(userID);
+  const matchID = users[userID];
+
   const passwordsMatch = bcrypt.compareSync(password, matchID.password);
 
-  if (!userExists(email,users)) {
-    //return if email does not exist
+  //return if email does not exist
+  if (!getUserByEmail(email,users)) {
     res.status(403).send("403 status - Invalid Credentials");
 
   } else if (!passwordsMatch) {
@@ -86,7 +54,6 @@ app.post("/login", (req, res) => {
       
   } else {
     
-    // res.cookie("user_id", matchID.id);
     req.session.user_id = matchID.id;
     res.redirect("/urls");
   }
@@ -103,7 +70,7 @@ app.post("/logout", (req, res) => {
 app.get("/urls", (req,res) => {
   const userLoggedIn = users[req.session.user_id];
   const templateVars = {
-    urls: urlsForUser(req.session.user_id),
+    urls: urlsForUser(req.session.user_id, urlDatabase),
     user: userLoggedIn
   };
 
@@ -175,17 +142,17 @@ app.post("/register", (req,res) => {
   if (!email || !password) {
     return res.status(400).send("Please provide e-mail or password");
   }
-  
-  if (userExists(email,users)) {
+  if (getUserByEmail(email,users)) {
     return res.status(400).send("400 bad request - User already exists");
   }
-
+  
   const id = generateRandomString();
   users[id] = {
     id,
     email,
     password: hashedPassword
   };
+  console.log(users);
   req.session.user_id = id;
   res.redirect("/urls");
 });
@@ -200,7 +167,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//Createa
+//Create
 app.post("/urls/:id", (req, res) => {
   const { longURL } = req.body;
   urlDatabase[req.params.id].longURL = longURL;
@@ -241,7 +208,6 @@ app.get("/urls/:id", (req,res) => {
 
   
     if (req.session.user_id !== urlDatabase[id].userID) {
-      console.log(req.session.user_id,urlDatabase[id]);
       return res.send("User does not own URL");
     }
   
@@ -267,9 +233,6 @@ app.get("/u/:id", (req, res) => {
 //if route doesn't exist
 app.use((req,res) => {
   res.status(404).send("URL not found");
-
-
-  //200 for found
 });
 
 //listener
