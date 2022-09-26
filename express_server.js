@@ -1,9 +1,10 @@
 const cookieSession = require('cookie-session');
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const app = express();
 const { getUserByEmail,generateRandomString, urlsForUser } = require('./helpers');
+const { users, urlDatabase } = require("./databases");
 const port = 8080;
+const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -14,20 +15,6 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 10 * 60 * 1000 // 10 min
 }));
-
-//Databases
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "firstUser"
-  },
-  "9sm5xK":{
-    longURL: "http://www.google.com",
-    userID: "firstUser"
-  }
-};
-
-const users = {};
 
 //Routes
 app.get("/", (req, res) => {
