@@ -117,7 +117,6 @@ app.post("/urls", (req, res) => {
     userID: req.session.user_id,
   };
 
-  console.log(urlDatabase);
   res.redirect(`/urls/${newUrl}`);
 });
 
