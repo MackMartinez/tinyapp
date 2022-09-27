@@ -31,7 +31,7 @@ app.post("/login", (req, res) => {
   const passwordsMatch = bcrypt.compareSync(password, matchID.password);
   
   //return if email does not exist
-  if (getUserByEmail(email,users)) {
+  if (!getUserByEmail(email,users)) {
     return res.status(403).send("403 status - Invalid Credentials");
     
   } else if (!passwordsMatch) {
