@@ -29,11 +29,10 @@ app.post("/login", (req, res) => {
   const userID = getUserByEmail(email,users);
   const matchID = users[userID];
   const passwordsMatch = bcrypt.compareSync(password, matchID.password);
-
   
   //return if email does not exist
-  if (!getUserByEmail(email,users)) {
-    res.status(403).send("403 status - Invalid Credentials");
+  if (getUserByEmail(email,users)) {
+    return res.status(403).send("403 status - Invalid Credentials");
     
   } else if (!passwordsMatch) {
     return res.status(403).send("403 status - Invalid Credentials");
@@ -162,8 +161,8 @@ app.post("/urls/:id", (req, res) => {
   if (!userLoggedIn) {
     return res.send("User does not own URL");
   }
-  
-  if (userLoggedIn !== urlDatabase[req.params.id].userID) {
+
+  if (userLoggedIn.id !== urlDatabase[req.params.id].userID) {
     return res.send("User does not own URL");
   }
 
@@ -172,7 +171,7 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//Edit
+//Edit - used for edit button on /urls
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const userLoggedIn = users[req.session.user_id];
@@ -203,7 +202,7 @@ app.get("/urls/:id", (req,res) => {
     return res.send("User does not own URL");
   }
 
-  if (userLoggedIn !== urlDatabase[req.params.id].userID) {
+  if (userLoggedIn.id !== urlDatabase[req.params.id].userID) {
     return res.send("User does not own URL");
   }
 
