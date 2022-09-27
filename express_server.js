@@ -111,10 +111,13 @@ app.post("/urls", (req, res) => {
   if (!users[req.session.user_id]) {
     return res.send("Please register in order to use TinyApp!");
   }
+
   urlDatabase[newUrl] = {
     longURL,
     userID: req.session.user_id,
   };
+
+  console.log(urlDatabase);
   res.redirect(`/urls/${newUrl}`);
 });
 
@@ -141,6 +144,7 @@ app.post("/register", (req,res) => {
   res.redirect("/urls");
 });
 
+
 //Delete single
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
@@ -154,19 +158,29 @@ app.post("/urls/:id/delete", (req, res) => {
 //Create
 app.post("/urls/:id", (req, res) => {
   const { longURL } = req.body;
+  const userLoggedIn = users[req.session.user_id];
+  
+  if (!userLoggedIn) {
+    return res.send("User does not own URL");
+  }
+  
+  if (userLoggedIn !== urlDatabase[req.params.id].userID) {
+    return res.send("User does not own URL");
+  }
+
   urlDatabase[req.params.id].longURL = longURL;
+
   res.redirect(`/urls`);
 });
 
 //Edit
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
+  const userLoggedIn = users[req.session.user_id];
 
-
-  if (req.session.user_id !== urlDatabase[id].userID) {
-    return res.status(404).send("404 - Not Found");
+  if (!userLoggedIn) {
+    return res.send("User does not own URL");
   }
-  
 
   const templateVars = {
     id,
@@ -187,14 +201,13 @@ app.get("/urls/:id", (req,res) => {
   };
   
   if (!userLoggedIn) {
-    res.send("Please login");
-  }
-
-  
-  if (req.session.user_id !== urlDatabase[id].userID) {
     return res.send("User does not own URL");
   }
-  
+
+  if (userLoggedIn !== urlDatabase[req.params.id].userID) {
+    return res.send("User does not own URL");
+  }
+
   res.render("urls_show", templateVars);
 });
 
@@ -202,9 +215,14 @@ app.get("/urls/:id", (req,res) => {
 app.get("/u/:id", (req, res) => {
   const idParam = req.params.id;
   const longURL = urlDatabase[idParam];
+  const userLoggedIn = users[req.session.user_id];
+
+  if (!userLoggedIn) {
+    return res.send("User does not own URL");
+  }
 
   if (!longURL) {
-    res.status(404).send("404 - Invalid or missing URL");
+    return res.status(404).send("404 - Invalid or missing URL");
   }
 
   if (!longURL.longURL) {
@@ -214,7 +232,7 @@ app.get("/u/:id", (req, res) => {
 }
 );
 
-//if route doesn't exist
+// //if route doesn't exist
 app.use((req,res) => {
   res.status(404).send("URL not found");
 });
